@@ -1,3 +1,4 @@
+#!/bin/bash
 
 cd /projects/BIG_WEATHER/wjc/JETSTREAM_BWW
 
