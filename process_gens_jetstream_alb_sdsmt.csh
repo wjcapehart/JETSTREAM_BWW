@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/csh
 source ~wjc/.bash_profile
 
 cd /projects/BIG_WEATHER/wjc/JETSTREAM_BWW

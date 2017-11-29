@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/csh
 #
 # LSF batch script to run the test MPI code
 #
@@ -6,9 +6,9 @@
 #BSUB -a poe                            # select poe
 #BSUB -n 1                            # number of total (MPI) tasks
 #BSUB -R "span[ptile=1]"               # run a max of 32 tasks per node
-#BSUB -J gens_sdsmt                            # job name
-#BSUB -o gens_sdsmt_%J.out                      # output filename
-#BSUB -e gens_sdsmt_%J.err                      # error filename
+#BSUB -J bww_js_alb                            # job name
+#BSUB -o bww_js_alb_%J.out                      # output filename
+#BSUB -e bww_js_alb_%J.err                      # error filename
 #BSUB -W 24:00                           # wallclock time
 #BSUB -q geyser                        # queue
 #BSUB -B
@@ -16,6 +16,8 @@
 
 module use /glade/apps/contrib/ncl-nightly/modules
 module load ncltest
+which ncl
+ncl -V
 
 cd /glade/u/home/capehart/code/JETSTREAM_BWW
 
