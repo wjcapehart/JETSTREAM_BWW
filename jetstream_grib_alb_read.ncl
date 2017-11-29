@@ -195,7 +195,7 @@ print(forecast_time)
       delete(z_500_arch@grid_mapping)
       print(getFillValue(z_500_arch))
       z_500_arch@_FillValue           = getFillValue(new((/10/), float))
-      z_500_arch@coordinates "isobaric_height longitude latitude"
+      z_500_arch@coordinates = "isobaric_height longitude latitude"
       z_500_arch@grid_mapping = "Lambert_Conformal"
       printVarSummary(z_500_arch)
 
