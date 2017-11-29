@@ -1,5 +1,5 @@
 
-cd /project/BIG_WEATHER/wjc/JETSTREAM_BWW
+cd /projects/BIG_WEATHER/wjc/JETSTREAM_BWW
 
 location_list=("BWWRAP")
 
