@@ -158,15 +158,20 @@ print(forecast_time)
       time&time          = time
 
 
-
+   Lambert_Conformal = toint(0)
+      Lambert_Conformal!0 =  "ncl_scalar"
+      Lambert_Conformal@grid_mapping_name = "lambert_conformal_conic";
+      Lambert_Conformal@standard_parallel = 39.5;
+      Lambert_Conformal@longitude_of_central_meridian = 360.0-98.50000762939453;
+      Lambert_Conformal@latitude_of_projection_origin = 39.5;
 
    z_500_arch = new((/ nt, ne, nt_wrf, 1, ny_wrf, nx_wrf /), float)
       z_500_arch!0               = "time"
       z_500_arch!1               = "ensemble_member"
       z_500_arch!2               = "forecast_time"
       z_500_arch!3               = "isobaric_height"
-      z_500_arch!4               = "south_north"
-      z_500_arch!5               = "west_east"
+      z_500_arch!4               = "y"
+      z_500_arch!5               = "x"
       z_500_arch&time            = time
       z_500_arch&ensemble_member = ensemble_member
       z_500_arch&forecast_time   = forecast_time
@@ -190,6 +195,8 @@ print(forecast_time)
       delete(z_500_arch@grid_mapping)
       print(getFillValue(z_500_arch))
       z_500_arch@_FillValue           = getFillValue(new((/10/), float))
+      z_500_arch@coordinates "isobaric_height longitude latitude"
+      z_500_arch@grid_mapping = "Lambert_Conformal"
       printVarSummary(z_500_arch)
 
 
@@ -205,6 +212,7 @@ print(forecast_time)
    delete(latitude@Grib1_Level_Type)
    delete(latitude@coordinates)
    delete(latitude@time1)
+   delete(latitude@time2)
    delete(latitude@_FillValue)
    latitude@units = "degrees north"
 
@@ -325,7 +333,10 @@ print(fout)
    fout->isobaric_height           = isobaric_height
    fout->latitude                  = latitude
    fout->longitude                 = longitude
+   fout->y                         = y
+   fout->x                         = x
    fout->geopotential_height       = z_500_arch
+   fout->Lambert_Conformal         = Lambert_Conformal
 
 
 
