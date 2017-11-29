@@ -7,8 +7,9 @@ begin
 
   url_root  = "http://149.165.157.204/thredds/dodsC/archive"
 
- ; start_date_string = "2017-01-01"
- ; end_date_string   = "2017-01-31"
+ ; start_date_string = "2017-01-04"
+ ; end_date_string   = "2017-01-05"
+
  setfileoption("nc", "Format",          "NetCDF4")
  setfileoption("nc", "CompressionLevel",        6)
   localle = "alb"
@@ -128,7 +129,7 @@ begin
    nt_wrf = dimsizes(forecast_time)
 
    time_steps = ispan(0, nt_wrf-1, 1)
-
+print(forecast_time)
    ensemble_member = localle+sprinti("%0.2i",ispan(1,ne,1))
    ensemble_member!0 = "ensemble_member"
    ensemble_member&ensemble_member = ensemble_member
@@ -255,9 +256,18 @@ begin
 
             f = addfile(urlfile1,"r")
 
+            time_thredds = toint(f->time)
+              time_thredds!0 = "forecast_time"
+              time_thredds&forecast_time = time_thredds
 
-            z_500_arch(t, e, :, 0, :, :) = (/ f->Geopotential_height_isobaric(:,{500},j_min:j_max, i_min:i_max) /)
 
+            z_500_arch(t, e, {time_thredds}, 0, :, :) = (/ f->Geopotential_height_isobaric({time_thredds},{500}, j_min:j_max, i_min:i_max) /)
+
+            if (dimsizes(time_thredds) .lt. 29) then
+               print("    !! missing times from "+member+ "_" + day_dir+ " ntime_steps ="+dimsizes(time_thredds) )
+            end if
+
+            delete(time_thredds)
             delete(f)
 
          else
