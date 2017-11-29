@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/bash
 #
 # LSF batch script to run the test MPI code
 #
@@ -14,6 +14,7 @@
 #BSUB -B
 #BSUB -N
 
+module load nco
 module use /glade/apps/contrib/ncl-nightly/modules
 module load ncltest
 which ncl
