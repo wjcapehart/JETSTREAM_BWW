@@ -333,8 +333,6 @@ print(fout)
    fout->isobaric_height           = isobaric_height
    fout->latitude                  = latitude
    fout->longitude                 = longitude
-   fout->y                         = y
-   fout->x                         = x
    fout->geopotential_height       = z_500_arch
    fout->Lambert_Conformal         = Lambert_Conformal
 
