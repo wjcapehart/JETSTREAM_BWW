@@ -328,13 +328,13 @@ print(fout)
    fout@subset_northwest_longitude = longitude(ny_wrf-1,0)
    fout@subset_northeast_latitude  = latitude(ny_wrf-1,nx_wrf-1)
    fout@subset_northeast_longitude = longitude(ny_wrf-1,nx_wrf-1)
+   fout->Lambert_Conformal         = Lambert_Conformal
    fout->ensemble_member           = ensemble_member
    fout->forecast_time             = forecast_time
    fout->isobaric_height           = isobaric_height
    fout->latitude                  = latitude
    fout->longitude                 = longitude
    fout->geopotential_height       = z_500_arch
-   fout->Lambert_Conformal         = Lambert_Conformal
 
 
 
