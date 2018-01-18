@@ -12,7 +12,7 @@ begin
 
  setfileoption("nc", "Format",          "NetCDF4")
  setfileoption("nc", "CompressionLevel",        6)
-  localle = "alb"
+  localle = "alb" ; change this one...
 
   title_string      = "bww_" + localle + "_500mb_"
   file_output_name = "./" + title_string + start_date_string + "_" + end_date_string + ".nc"
