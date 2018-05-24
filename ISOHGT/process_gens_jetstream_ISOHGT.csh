@@ -1,7 +1,7 @@
 #!/bin/bash
 source ~wjc/.bash_profile
 
-cd /projects/BIG_WEATHER/wjc/JETSTREAM_BWW
+cd ~/GitHub/JETSTREAM_BWW/ISOHGT
 
 location_list=("BWWRAP")
 
@@ -57,23 +57,27 @@ eom_date=(  "2016-01-31"
             "2017-12-31"
             "2018-01-31")
 
+PARAMETER="ISOHGT"
 
 
+SCHOOL=( alb csu psu smt ttu und uwm )
 
 number_of_months=${#start_date[@]}
 number_of_regions=${#location_list[@]}
+number_of_schools=${#SCHOOL[@]}
 
 
 echo End of Month Date = $eom_date
 
 echo Number of Month Dates = $number_of_months
 
+echo Number of Shools = $number_of_schools
 
 number_of_regions=1
 
 # use for loop to read all values and indexes
 
-for (( j=1; j<${number_of_regions}+1; j++ ));
+for (( j=1;j<${number_of_regions}+1; j++ ));
 do
    LOCATION=${location_list[$j-1]}
    for (( i=1; i<${number_of_months}+1; i++ ));
@@ -87,23 +91,27 @@ do
       echo "-----------------------------------------------------"
       echo
 
-      # command-line syntax should read (for example):
-      #  ncl 'scenario="WRFRAP"' 'start_date_string="2016-01-01"' 'end_date_string="2016-02-10"'  script_read_ensembles_from_thredds.ncl
+      for (( k=1; k<${number_of_schools}+1; k++ ));
+      do
 
-      echo ncl scenario='"'${location_list[$j-1]}'"' \
-               start_date_string='"'${start_date[$i-1]}'"'   \
-               end_date_string='"'${eom_date[$i-1]}'"'       \
-               jetstream_grib_alb_read.ncl
+         # command-line syntax should read (for example):
+         #  ncl 'scenario="WRFRAP"' 'start_date_string="2016-01-01"' 'end_date_string="2016-02-10"'  script_read_ensembles_from_thredds.ncl
 
-      echo
-      echo "- - - - - - - - - - - - - - - - - - - - - - - - - - -"
-      echo
+         echo ncl scenario='"'${location_list[$j-1]}'"' \
+                  start_date_string='"'${start_date[$i-1]}'"'   \
+                  end_date_string='"'${eom_date[$i-1]}'"'       \
+                  jetstream__${PARAMETER}_grib_${SCHOOL[$k-1]}_read.ncl
 
-      ncl scenario='"'${location_list[$j-1]}'"' \
-               start_date_string='"'${start_date[$i-1]}'"'   \
-               end_date_string='"'${eom_date[$i-1]}'"'       \
-               jetstream_grib_alb_read.ncl >& LOG_${LOCATION}_${start_date[$i-1]}_to_${eom_date[$i-1]}.txt
+         echo
+         echo "- - - - - - - - - - - - - - - - - - - - - - - - - - -"
+         echo
 
+         ncl scenario='"'${location_list[$j-1]}'"' \
+         start_date_string='"'${start_date[$i-1]}'"'   \
+         end_date_string='"'${eom_date[$i-1]}'"'       \
+         jetstream__${PARAMETER}_grib_${SCHOOL[$k-1]}_read.ncl >& LOG_${PARAMETER}_grib_${SCHOOL[$k-1]}_${LOCATION}_${start_date[$i-1]}_to_${eom_date[$i-1]}.txt
+
+      done
    done
 
    echo

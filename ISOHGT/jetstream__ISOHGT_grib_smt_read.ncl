@@ -7,12 +7,15 @@ begin
 
   url_root  = "http://149.165.157.204/thredds/dodsC/archive"
 
- ; start_date_string = "2017-01-04"
- ; end_date_string   = "2017-01-05"
+
+  start_date_string = "2017-02-01"
+  end_date_string   = "2017-02-28"
+
+ print(start_date_string)
 
  setfileoption("nc", "Format",          "NetCDF4")
  setfileoption("nc", "CompressionLevel",        6)
-  localle = "alb" ; change this one...
+  localle = "smt" ; change this one...
 
   title_string      = "bww_" + localle + "_500mb_"
   file_output_name = "./" + title_string + start_date_string + "_" + end_date_string + ".nc"
@@ -36,7 +39,7 @@ begin
                           "uwm" /)
 
    member_table_nens = (/ 13, \
-                          01, \
+                          02, \
                           09, \
                           03, \
                           08, \
@@ -45,11 +48,11 @@ begin
 
    member_table_pinterval = (/ 01, \
                                01, \
-                               03, \
-                               03, \
-                               03, \
-                               03, \
-                               03 /)
+                               01, \
+                               01, \
+                               01, \
+                               01, \
+                               01 /)
 
    ne = member_table_nens(ind(member_table_name .eq. localle))
 
@@ -63,7 +66,7 @@ begin
 
   ; Crack open a temporary wrf file and grab our study area.  (This will be bigger than our acutal area.)
 
-  initital_setup_url = "http://149.165.157.204/thredds/dodsC/archive/alb11/171001/alb11_17100100_post.grib"
+  initital_setup_url = "http://149.165.157.204/thredds/dodsC/archive/alb11/170809/alb11_17080900.grb"
 
   f = addfile(initital_setup_url, "r")
 
@@ -88,8 +91,11 @@ begin
   delete(latw)
   delete(lonw)
 
-  longitude = f->$"latitude_-90_to_and90_surface"$(0, j_min:j_max, i_min:i_max)
-  latitude  = f->$"east_longitude_0-360_surface"$( 0, j_min:j_max, i_min:i_max)
+  latitude   = f->$"latitude_-90_to_and90_surface"$(0, j_min:j_max, i_min:i_max)
+  longitude  = f->$"east_longitude_0-360_surface"$( 0, j_min:j_max, i_min:i_max)
+
+   y = f->y(j_min:j_max)
+   x = f->x(i_min:i_max)
 
   delete(f)
 
@@ -176,6 +182,10 @@ print(forecast_time)
       z_500_arch&ensemble_member = ensemble_member
       z_500_arch&forecast_time   = forecast_time
       z_500_arch&isobaric_height = isobaric_height
+      z_500_arch&x               = x
+      z_500_arch&y               = y
+
+
       z_500_arch@description     = "Geopotential Height"
       z_500_arch@long_name       =  z_500_arch@description
       z_500_arch@standard_name   = "geopotential_height"
@@ -254,7 +264,7 @@ print(forecast_time)
                      member    + \
                      "_"       + \
                      day_dir   + \
-                     "00_post.grib"
+                     "00.grb"
 
          print(" - "+member+ "_" + day_dir )
 
@@ -267,9 +277,18 @@ print(forecast_time)
             time_thredds = toint(f->time)
               time_thredds!0 = "forecast_time"
               time_thredds&forecast_time = time_thredds
+    
 
+            isobaric_unit_check = f->isobaric1
 
-            z_500_arch(t, e, {time_thredds}, 0, :, :) = (/ f->Geopotential_height_isobaric({time_thredds},{500}, j_min:j_max, i_min:i_max) /)
+              if (isobaric_unit_check@units .eq. "Pa") then
+                iso_scale_fac = 100
+              else
+                 iso_scale_fac = 1
+              end if
+
+            z_500_arch(t, e, {time_thredds}, 0, :, :) = (/ f->Geopotential_height_isobaric({time_thredds},{500*iso_scale_fac}, j_min:j_max, i_min:i_max) /)
+
 
             if (dimsizes(time_thredds) .lt. 29) then
                print("    !! missing times from "+member+ "_" + day_dir+ " ntime_steps ="+dimsizes(time_thredds) )
@@ -341,6 +360,8 @@ print(fout)
 
 
    delete(fout)
+
+  print("run complete")
 
 
 
