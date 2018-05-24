@@ -3,6 +3,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 
 begin
 
+  variable_ID_label = "T2M"
   directory = "./"
 
   url_root  = "http://149.165.157.204/thredds/dodsC/archive"
@@ -14,7 +15,7 @@ begin
  setfileoption("nc", "CompressionLevel",        6)
   ;;;localle = "alb" ; change this one...
 
-  title_string      = "bww_" + localle + "_500mb_"
+  title_string      = "bww_" + localle + "_" + variable_ID_label + "_"
   file_output_name = "./" + title_string + start_date_string + "_" + end_date_string + ".nc"
 
   print("Processing "+file_output_name)

@@ -1,7 +1,7 @@
 #!/bin/bash
 source ~wjc/.bash_profile
 
-cd ~/GitHub/JETSTREAM_BWW/ISOHGT
+cd ~/GitHub/JETSTREAM_BWW/T2M
 
 location_list=("BWWRAP")
 
