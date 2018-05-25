@@ -169,6 +169,22 @@ begin
       stdev_v@cell_method        = "x,y: stdev"
       stdev_v@units              = "m"
 
+
+         mean_f                       = variablet_time_ens
+            stdev_f@description        = "mean ensemble forecast geopotential height spatial mean"
+            stdev_f@long_name          = "mean ensemble forecast geopotential height spatial mean"
+            stdev_f@standard_name      = "geopotential_height"
+            stdev_f@cell_method        = "x,y: mean"
+            stdev_f@units              = "m"
+
+         mean_v                       = variablet_time_ens
+            stdev_v@description        = "mean ensemble validation geopotential height spatial mean"
+            stdev_v@long_name          = "mean ensemble validation geopotential height spatial mean"
+            stdev_v@standard_name      = "geopotential_height"
+            stdev_v@cell_method        = "x,y: mean"
+            stdev_v@units              = "m"
+
+
    stdev_ens_fx                     = variable
       stdev_ens_fx@description      = "spatial mean forecast ensemble gepotential height standard deviation"
       stdev_ens_fx@long_name        = "spatial mean forecast ensemble gepotential height standard deviation"
@@ -438,6 +454,9 @@ begin
       stdev_f( t, :, :, :) =  dim_stddev_n_Wrap(forecast(  :,:,:,:,:), (/ 3,4 /) )
       stdev_v( t, :, :, :) =  dim_stddev_n_Wrap(validation(:,:,:,:,:), (/ 3,4 /) )
 
+      mean_f( t, :, :, :) =  dim_avg_n_Wrap(forecast(  :,:,:,:,:), (/ 3,4 /) )
+      mean_v( t, :, :, :) =  dim_avg_n_Wrap(validation(:,:,:,:,:), (/ 3,4 /) )
+
       rmse( t, :, :, :) =  dim_rmsd_n_Wrap(forecast(  :,:,:,:,:),  \
                                            validation(:,:,:,:,:), (/ 3,4 /) )
 
@@ -506,6 +525,8 @@ begin
       fout->inventory                  = inventory
       fout->stdev_forecast_by_ensemble_member             = stdev_f
       fout->stdev_validation_by_ensemble_member           = stdev_v
+      fout->mean_forecast_by_ensemble_member              = mean_f
+      fout->mean_validation_by_ensemble_member            = mean_v
       fout->correlation_fx_v_valid_through_all_ensembles  = corr_through_ens
       fout->correlation_fx_v_valid_by_ensemble_member     = corr
       fout->rmse_fx_v_valid_through_all_ensembles         = rmse_through_ens

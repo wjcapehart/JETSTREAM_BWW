@@ -80,42 +80,42 @@ echo Number of Shools = $number_of_schools
 number_of_regions=1
 
 # use for loop to read all values and indexes
-
-for (( j=1;j<${number_of_regions}+1; j++ ));
+for (( k=1; k<${number_of_schools}+1; k++ ));
 do
-   LOCATION=${location_list[$j-1]}
-   for (( i=1; i<${number_of_months}+1; i++ ));
+
+   for (( j=1;j<${number_of_regions}+1; j++ ));
    do
-      echo "====================================================="
-      echo
-
-      echo $LOCATION $i " / " ${number_of_months} " : " ${start_date[$i-1]}
-
-      echo
-      echo "-----------------------------------------------------"
-      echo
-
-      for (( k=1; k<${number_of_schools}+1; k++ ));
+      LOCATION=${location_list[$j-1]}
+      for (( i=1; i<${number_of_months}+1; i++ ));
       do
+         echo "====================================================="
+         echo
 
-         # command-line syntax should read (for example):
-         #  ncl 'scenario="WRFRAP"' 'start_date_string="2016-01-01"' 'end_date_string="2016-02-10"'  script_read_ensembles_from_thredds.ncl
+         echo $LOCATION $i " / " ${number_of_months} " : " ${start_date[$i-1]}
 
-         echo ncl scenario='"'${location_list[$j-1]}'"' \
+         echo
+         echo "-----------------------------------------------------"
+         echo
+
+
+            # command-line syntax should read (for example):
+            #  ncl 'scenario="WRFRAP"' 'start_date_string="2016-01-01"' 'end_date_string="2016-02-10"'  script_read_ensembles_from_thredds.ncl
+
+            echo ncl scenario='"'${location_list[$j-1]}'"' \
+                     start_date_string='"'${start_date[$i-1]}'"'   \
+                     end_date_string='"'${eom_date[$i-1]}'"'       \
+                     localle='"'${SCHOOL[$k-1]}'"'       \
+                     jetstream__${PARAMETER}_grib_SCH_read.ncl
+
+            echo
+            echo "- - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            echo
+
+            ncl scenario='"'${location_list[$j-1]}'"' \
                   start_date_string='"'${start_date[$i-1]}'"'   \
                   end_date_string='"'${eom_date[$i-1]}'"'       \
                   localle='"'${SCHOOL[$k-1]}'"'       \
-                  jetstream__${PARAMETER}_grib_SCH_read.ncl
-
-         echo
-         echo "- - - - - - - - - - - - - - - - - - - - - - - - - - -"
-         echo
-
-         ncl scenario='"'${location_list[$j-1]}'"' \
-               start_date_string='"'${start_date[$i-1]}'"'   \
-               end_date_string='"'${eom_date[$i-1]}'"'       \
-               localle='"'${SCHOOL[$k-1]}'"'       \
-               jetstream__${PARAMETER}_grib_SCH_read.ncl >& LOG_${PARAMETER}_grib_${SCHOOL[$k-1]}_${LOCATION}_${start_date[$i-1]}_to_${eom_date[$i-1]}.txt
+                  jetstream__${PARAMETER}_grib_SCH_read.ncl >& LOG_${PARAMETER}_grib_${SCHOOL[$k-1]}_${LOCATION}_${start_date[$i-1]}_to_${eom_date[$i-1]}.txt
 
       done
    done
