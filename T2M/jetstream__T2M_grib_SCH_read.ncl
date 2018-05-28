@@ -3,13 +3,65 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 
 begin
 
-  variable_ID_label = "T2M"
-  directory = "./"
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;
+  ; Code Processes Through the BWW GRIB ensemble data storage on Jetstream
+  ;
+  ;   Extracts one field for bulk-scale processing for a given subset.
+
+
+  ; start_date_string = "2017-02-01"  ;; commented out for batch script
+  ; end_date_string   = "2017-02-28"  ;; commented out for batch script
+  ; localle           = "alb"         ;; commented out for batch script
+
+  variable_ID_label = "T2M"  ; Single Value Title Label for File
+
+  variable_file_id  = "Temperature_height_above_ground" ; Variable as named on server
+
+  standard_name_for_variable = "air_temperature"
+  long_name_for_variable     = "2-m Air Temperature"
+  units_for_variable         = "K"
+
+  vertical_coordinate_for_variable     = "height_above_ground"
+  vertical_coordinate_value            = (/ 2.0 /)
+  vertical_coordinate_units            = "m"
+  vertical_coordinates_posdir          = "up"
+  vertical_coordinates_long_name       = "Observed Height Above Ground"
+  vertical_coordinates_standard_name   = "height"
+
+
+
+  latitude_file_id  = "latitude_-90_to_and90_surface"   ; Latitude as named on server
+  longitude_file_id = "east_longitude_0-360_surface"    ; Longitude as named on server
+
+  directory = "./"           ; directory for processing [keep me local!]
+
+  ;;; local region to clip
+  lat_min = 34. ; degrees North
+  lat_max = 55. ; degrees North
+
+  lon_min = 247. ; degrees East
+  lon_max = 268. ; degrees East
+
+  ; URL or direct file system path to archive directory/THREDDS server.
 
   url_root  = "http://149.165.157.204/thredds/dodsC/archive"
 
- ;start_date_string = "2017-02-01"
- ; end_date_string   = "2017-02-28"
+  ; Thredds Fixed URL for generic metadata extractoin. (don't change)
+
+  initital_setup_url = "http://149.165.157.204/thredds/dodsC/archive/alb10/180319/alb10_18031900_post.grib"
+
+
+  ;  Projection Information for NetCDF Files (customized for BWW community domain)
+
+  Lambert_Conformal = toint(0)
+     Lambert_Conformal!0 =  "ncl_scalar"
+     Lambert_Conformal@grid_mapping_name = "lambert_conformal_conic";
+     Lambert_Conformal@standard_parallel = 39.5;
+     Lambert_Conformal@longitude_of_central_meridian = 360.0-98.50000762939453;
+     Lambert_Conformal@latitude_of_projection_origin = 39.5;
+
+
 
  setfileoption("nc", "Format",          "NetCDF4")
  setfileoption("nc", "CompressionLevel",        6)
@@ -64,20 +116,13 @@ begin
 
   ; Crack open a temporary wrf file and grab our study area.  (This will be bigger than our acutal area.)
 
-  initital_setup_url = "http://149.165.157.204/thredds/dodsC/archive/alb10/180319/alb10_18031900_post.grib"
 
   f = addfile(initital_setup_url, "r")
 
 
-  latw = f->$"latitude_-90_to_and90_surface"$(0,:,:)
-  lonw = f->$"east_longitude_0-360_surface"$(0,:,:)
+  latw = f->$$latitude_file_id$(0,:,:)
+  lonw = f->longitude_file_id(0,:,:)
 
-  ;;; local region to clip
-  lat_min = 34. ; degrees North
-  lat_max = 55. ; degrees North
-
-  lon_min = 247. ; degrees East
-  lon_max = 268. ; degrees East
 
   wrf_region_ind = region_ind(latw,lonw,lat_min,lat_max,lon_min,lon_max)
 
@@ -89,8 +134,8 @@ begin
   delete(latw)
   delete(lonw)
 
-  longitude = f->$"latitude_-90_to_and90_surface"$(0, j_min:j_max, i_min:i_max)
-  latitude  = f->$"east_longitude_0-360_surface"$( 0, j_min:j_max, i_min:i_max)
+  longitude = f->$latitude_file_id$(  0, j_min:j_max, i_min:i_max)
+  latitude  = f->$longitude_file_id$( 0, j_min:j_max, i_min:i_max)
 
   delete(f)
 
@@ -137,15 +182,15 @@ print(forecast_time)
    ensemble_member@description = "Ensemble ID"
    ensemble_member@long_name   = "Ensemble ID"
 
-   height_above_ground                 = (/ 2. /)
-   height_above_ground!0               = "height_above_ground"
-   height_above_ground&height_above_ground = height_above_ground
-   height_above_ground@description     = "Specified height level above ground"
-   height_above_ground@long_name       =  height_above_ground@description
-   height_above_ground@standard_name   = "height"
-   height_above_ground@positive        = "up"
-   height_above_ground@unit            = "m"
-   height_above_ground@axis            = "Z"
+   height_above_ground                     = vertical_coordinate_value
+   height_above_ground!0                   = vertical_coordinate_for_variable
+   height_above_ground&height_above_ground = vertical_coordinate_value
+   height_above_ground@description         = vertical_coordinates_long_name
+   height_above_ground@long_name           = height_above_ground@description
+   height_above_ground@standard_name       = vertical_coordinates_standard_name
+   height_above_ground@positive            = vertical_coordinates_posdir
+   height_above_ground@unit                = vertical_coordinate_units
+   height_above_ground@axis                = "Z"
 
 
 
@@ -160,47 +205,42 @@ print(forecast_time)
       time&time          = time
 
 
-   Lambert_Conformal = toint(0)
-      Lambert_Conformal!0 =  "ncl_scalar"
-      Lambert_Conformal@grid_mapping_name = "lambert_conformal_conic";
-      Lambert_Conformal@standard_parallel = 39.5;
-      Lambert_Conformal@longitude_of_central_meridian = 360.0-98.50000762939453;
-      Lambert_Conformal@latitude_of_projection_origin = 39.5;
 
-   z_500_arch = new((/ nt, ne, nt_wrf, 1, ny_wrf, nx_wrf /), float)
-      z_500_arch!0               = "time"
-      z_500_arch!1               = "ensemble_member"
-      z_500_arch!2               = "forecast_time"
-      z_500_arch!3               = "height_above_ground"
-      z_500_arch!4               = "y"
-      z_500_arch!5               = "x"
-      z_500_arch&time            = time
-      z_500_arch&ensemble_member = ensemble_member
-      z_500_arch&forecast_time   = forecast_time
-      z_500_arch&height_above_ground = height_above_ground
-      z_500_arch@description     = "2-m Air Temperature"
-      z_500_arch@long_name       =  z_500_arch@description
-      z_500_arch@standard_name   = "air_temperature"
-      z_500_arch@coordinates     = "time height_above_ground latitude longitude"
-      z_500_arch@units           = "m"
-      ;delete(z_500_arch@Isobaric)
-      delete(z_500_arch@Grib1_Level_Type)
-      delete(z_500_arch@Grib1_Parameter_Name)
-      delete(z_500_arch@Grib1_Parameter)
-      delete(z_500_arch@Grib1_TableVersion)
-      delete(z_500_arch@Grib1_Subcenter)
-      delete(z_500_arch@Grib1_Center)
-      delete(z_500_arch@Grib_Variable_Id)
-      delete(z_500_arch@coordinates)
-      delete(z_500_arch@isobaric1)
-      delete(z_500_arch@_FillValue)
-      delete(z_500_arch@missing_value)
-      delete(z_500_arch@grid_mapping)
-      print(getFillValue(z_500_arch))
-      z_500_arch@_FillValue           = getFillValue(new((/10/), float))
-      z_500_arch@coordinates = "time height_above_ground longitude latitude"
-      z_500_arch@grid_mapping = "Lambert_Conformal"
-      printVarSummary(z_500_arch)
+
+   thredd_var = new((/ nt, ne, nt_wrf, 1, ny_wrf, nx_wrf /), float)
+      thredd_var!0                   = "time"
+      thredd_var!1                   = "ensemble_member"
+      thredd_var!2                   = "forecast_time"
+      thredd_var!3                   = vertical_coordinate_for_variable
+      thredd_var!4                   = "y"
+      thredd_var!5                   = "x"
+      thredd_var&time                = time
+      thredd_var&ensemble_member     = ensemble_member
+      thredd_var&forecast_time       = forecast_time
+      thredd_var&height_above_ground = height_above_ground
+      thredd_var@description     =  long_name_for_variable
+      thredd_var@long_name       =  thredd_var@description
+      thredd_var@standard_name   = standard_name_for_variable
+      thredd_var@coordinates     = "time " + vertical_coordinate_for_variable + "latitude longitude"
+      thredd_var@units           = units_for_variable
+      ;delete(thredd_var@Isobaric)
+      delete(thredd_var@Grib1_Level_Type)
+      delete(thredd_var@Grib1_Parameter_Name)
+      delete(thredd_var@Grib1_Parameter)
+      delete(thredd_var@Grib1_TableVersion)
+      delete(thredd_var@Grib1_Subcenter)
+      delete(thredd_var@Grib1_Center)
+      delete(thredd_var@Grib_Variable_Id)
+      delete(thredd_var@coordinates)
+      delete(thredd_var@isobaric1)
+      delete(thredd_var@_FillValue)
+      delete(thredd_var@missing_value)
+      delete(thredd_var@grid_mapping)
+      print(getFillValue(thredd_var))
+      thredd_var@_FillValue           = getFillValue(new((/10/), float))
+      thredd_var@coordinates = "time height_above_ground longitude latitude"
+      thredd_var@grid_mapping = "Lambert_Conformal"
+      printVarSummary(thredd_var)
 
 
    delete(latitude@missing_value)
@@ -282,7 +322,7 @@ print(forecast_time)
               time_thredds!0 = "forecast_time"
               time_thredds&forecast_time = time_thredds
 
-            z_500_arch(t, e, {time_thredds}, 0, :, :) = (/ f->Geopotential_height_isobaric({time_thredds},{500}, j_min:j_max, i_min:i_max) /)
+            thredd_var(t, e, {time_thredds}, 0, :, :) = (/ f->$variable_file_id$({time_thredds},{2}, j_min:j_max, i_min:i_max) /)
 
             if (dimsizes(time_thredds) .lt. 29) then
                print("    !! missing times from "+member+ "_" + day_dir+ " ntime_steps ="+dimsizes(time_thredds) )
@@ -301,7 +341,7 @@ print(forecast_time)
               time_thredds!0 = "forecast_time"
               time_thredds&forecast_time = time_thredds
 
-            z_500_arch(t, e, {time_thredds}, 0, :, :) = (/ f->Temperature_height_above_ground({time_thredds},{2}, j_min:j_max, i_min:i_max) /)
+            thredd_var(t, e, {time_thredds}, 0, :, :) = (/ f->$variable_file_id$({time_thredds},{2}, j_min:j_max, i_min:i_max) /)
 
             if (dimsizes(time_thredds) .lt. 29) then
                print("    !! missing times from "+member+ "_" + day_dir+ " ntime_steps ="+dimsizes(time_thredds) )
@@ -361,14 +401,14 @@ print(fout)
    fout@subset_northwest_latitude  = latitude(ny_wrf-1,0)
    fout@subset_northwest_longitude = longitude(ny_wrf-1,0)
    fout@subset_northeast_latitude  = latitude(ny_wrf-1,nx_wrf-1)
-   fout@subset_northeast_longitude = longitude(ny_wrf-1,nx_wrf-1)
-   fout->Lambert_Conformal         = Lambert_Conformal
-   fout->ensemble_member           = ensemble_member
-   fout->forecast_time             = forecast_time
-   fout->height_above_ground           = height_above_ground
-   fout->latitude                  = latitude
-   fout->longitude                 = longitude
-   fout->air_temperature       = z_500_arch
+   fout@subset_northeast_longitude          = longitude(ny_wrf-1,nx_wrf-1)
+   fout->Lambert_Conformal                  = Lambert_Conformal
+   fout->ensemble_member                    = ensemble_member
+   fout->forecast_time                      = forecast_time
+   fout->$vertical_coordinate_for_variable$ = height_above_ground
+   fout->latitude                           = latitude
+   fout->longitude                          = longitude
+   fout->$standard_name$                    = thredd_var
 
 
 
